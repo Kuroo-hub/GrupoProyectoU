@@ -467,7 +467,7 @@ VALUES
 (101, 'LIBRE', 91), (102, 'LIBRE', 92), (103, 'LIBRE', 93), (104, 'LIBRE', 94), (105, 'LIBRE', 95),
 (106, 'LIBRE', 96), (107, 'LIBRE', 97), (108, 'LIBRE', 98), (109, 'LIBRE', 99), (110, 'LIBRE', 100);
 
--- PRESTAMO (105 registros)
+-- PRESTAMO (110 registros)
 INSERT INTO prestamo (id_prestamo, fecha_prestamo, fecha_limite, fecha_devolucion, estado, id_empleado, id_socio)
 OVERRIDING SYSTEM VALUE
 VALUES
@@ -575,9 +575,14 @@ VALUES
 (102, '2026-06-05 09:30:00', '2026-06-12', '2026-06-11 15:30:00', 'DEVUELTO', 1, 97),
 (103, '2026-06-08 16:00:00', '2026-06-15', '2026-06-19 11:00:00', 'ATRASADO', 2, 98),
 (104, '2026-06-10 10:45:00', '2026-06-17', '2026-06-16 14:20:00', 'DEVUELTO', 3, 99),
-(105, '2026-06-12 13:15:00', '2026-06-19', '2026-06-19 16:30:00', 'DEVUELTO', 4, 100);
+(105, '2026-06-12 13:15:00', '2026-06-19', '2026-06-19 16:30:00', 'DEVUELTO', 4, 100),
+(106, '2026-05-01 09:00:00', '2026-05-08', '2026-05-15 14:00:00', 'ATRASADO', 1, 1),
+(107, '2026-05-05 10:30:00', '2026-05-12', '2026-05-22 11:15:00', 'ATRASADO', 2, 1),
+(108, '2026-05-10 14:00:00', '2026-05-17', '2026-05-30 09:30:00', 'ATRASADO', 3, 1),
+(109, '2026-05-15 11:00:00', '2026-05-22', '2026-06-05 16:20:00', 'ATRASADO', 4, 1),
+(110, '2026-05-20 15:45:00', '2026-05-27', '2026-06-12 10:00:00', 'ATRASADO', 5, 1);
 
--- PRESTAMO_EJEMPLAR (105 registros)
+-- PRESTAMO_EJEMPLAR (110 registros)
 INSERT INTO prestamo_ejemplar (id_prestamo, id_ejemplar)
 VALUES
 (1, 2),
@@ -620,9 +625,14 @@ VALUES
 (86, 96), (87, 97), (88, 98), (89, 99), (90, 100),
 (91, 110), (92, 36), (93, 37), (94, 38), (95, 39),
 (96, 40), (97, 41), (98, 42), (99, 43), (100, 44),
-(101, 45), (102, 46), (103, 47), (104, 48), (105, 49);
+(101, 45), (102, 46), (103, 47), (104, 48), (105, 49),
+(106, 50), 
+(107, 51), 
+(108, 52), 
+(109, 53), 
+(110, 54);
 
--- MULTA (32 registros)
+-- MULTA (37 registros)
 INSERT INTO multa (id_multa, fecha_multa, estado, monto, id_prestamo)
 OVERRIDING SYSTEM VALUE
 VALUES
@@ -657,5 +667,20 @@ VALUES
 (29, '2026-05-27', 'PENDIENTE', 7.50, 95),
 (30, '2026-05-31', 'PENDIENTE', 10.00, 97),
 (31, '2026-06-06', 'PAGADO', 5.00, 99),
-(32, '2026-06-12', 'PENDIENTE', 10.00, 101);
+(32, '2026-06-12', 'PENDIENTE', 10.00, 101),
+(33, '2026-05-15', 'PENDIENTE', 15.00, 106),
+(34, '2026-05-22', 'PENDIENTE', 20.00, 107),
+(35, '2026-05-30', 'PAGADO', 25.00, 108),
+(36, '2026-06-05', 'PENDIENTE', 30.00, 109),
+(37, '2026-06-12', 'PENDIENTE', 35.00, 110);
 
+
+SELECT setval(pg_get_serial_sequence('empleado', 'id_empleado'), (SELECT MAX(id_empleado) FROM empleado));
+SELECT setval(pg_get_serial_sequence('socio', 'id_socio'), (SELECT MAX(id_socio) FROM socio));
+SELECT setval(pg_get_serial_sequence('editorial', 'id_editorial'), (SELECT MAX(id_editorial) FROM editorial));
+SELECT setval(pg_get_serial_sequence('genero', 'id_genero'), (SELECT MAX(id_genero) FROM genero));
+SELECT setval(pg_get_serial_sequence('autor', 'id_autor'), (SELECT MAX(id_autor) FROM autor));
+SELECT setval(pg_get_serial_sequence('libro', 'id_libro'), (SELECT MAX(id_libro) FROM libro));
+SELECT setval(pg_get_serial_sequence('ejemplar', 'id_ejemplar'), (SELECT MAX(id_ejemplar) FROM ejemplar));
+SELECT setval(pg_get_serial_sequence('prestamo', 'id_prestamo'), (SELECT MAX(id_prestamo) FROM prestamo));
+SELECT setval(pg_get_serial_sequence('multa', 'id_multa'), (SELECT MAX(id_multa) FROM multa));

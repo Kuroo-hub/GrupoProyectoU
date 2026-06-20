@@ -14,19 +14,15 @@ SELECT
     p.id_prestamo,
     e.id_ejemplar,
     l.nombre AS libro,
-    s.nombre || ' ' || s.apellido AS socio,
+    CONCAT(s.nombre, ' ', s.apellido) AS socio,
     p.fecha_prestamo,
     p.fecha_limite,
     p.estado
 FROM prestamo p
-INNER JOIN prestamo_ejemplar pe 
-    ON p.id_prestamo = pe.id_prestamo
-INNER JOIN ejemplar e 
-    ON pe.id_ejemplar = e.id_ejemplar
-INNER JOIN libro l 
-    ON e.id_libro = l.id_libro
-INNER JOIN socio s 
-    ON p.id_socio = s.id_socio;
+INNER JOIN prestamo_ejemplar pe ON p.id_prestamo = pe.id_prestamo
+INNER JOIN ejemplar e ON pe.id_ejemplar = e.id_ejemplar
+INNER JOIN libro l ON e.id_libro = l.id_libro
+INNER JOIN socio s ON p.id_socio = s.id_socio;
 
 --Consultar préstamos activos
 SELECT 
@@ -54,20 +50,16 @@ SELECT
     p.id_prestamo,
     l.nombre AS libro,
     e.id_ejemplar,
-    s.nombre || ' ' || s.apellido AS socio,
+    CONCAT(s.nombre, ' ', s.apellido) AS socio,
     p.fecha_prestamo,
     p.fecha_limite,
-    CURRENT_DATE - p.fecha_limite AS dias_retraso,
+    EXTRACT(DAY FROM (CURRENT_TIMESTAMP - p.fecha_limite)) AS dias_retraso, 
     p.estado
 FROM prestamo p
-INNER JOIN prestamo_ejemplar pe 
-    ON p.id_prestamo = pe.id_prestamo
-INNER JOIN ejemplar e 
-    ON pe.id_ejemplar = e.id_ejemplar
-INNER JOIN libro l 
-    ON e.id_libro = l.id_libro
-INNER JOIN socio s 
-    ON p.id_socio = s.id_socio
+INNER JOIN prestamo_ejemplar pe ON p.id_prestamo = pe.id_prestamo
+INNER JOIN ejemplar e ON pe.id_ejemplar = e.id_ejemplar
+INNER JOIN libro l ON e.id_libro = l.id_libro
+INNER JOIN socio s ON p.id_socio = s.id_socio
 WHERE p.fecha_devolucion IS NULL
   AND p.fecha_limite < CURRENT_DATE;
 
@@ -113,20 +105,15 @@ WHERE pe.id_prestamo IS NULL;
 --Empleado con más préstamos
 SELECT 
     em.id_empleado,
-    em.nombre || ' ' || em.apellido AS empleado,
+    UPPER(CONCAT(em.nombre, ' ', em.apellido)) AS empleado,
     COUNT(p.id_prestamo) AS total_prestamos
 FROM empleado em
-INNER JOIN prestamo p 
-    ON em.id_empleado = p.id_empleado
+INNER JOIN prestamo p ON em.id_empleado = p.id_empleado
 GROUP BY em.id_empleado, em.nombre, em.apellido
 ORDER BY total_prestamos DESC
 LIMIT 1;
 
--- ==========================================
--- CONSULTAS DE TEXTO
--- ==========================================
-
--- 1. PRIMERA CONSULTA
+-- Libros mas prestados
 SELECT 
     l.id_libro,
     l.nombre AS titulo_libro,
@@ -154,11 +141,17 @@ GROUP BY l.id_libro, l.nombre
 
 ORDER BY total_veces_prestado DESC;
 
--- 2. SEGUNDA CONSULTA
+-- Consultar socios con más multas acumuladas
 SELECT 
-    id_socio,
-    dui,
-    CONCAT(nombre, ' ', apellido) AS nombre_completo,
-    apellido || ', ' || nombre AS formato_archivo,
-    CASE WHEN sexo = 'M' THEN 'Masculino' ELSE 'Femenino' END AS genero
-FROM socio;
+    s.id_socio,
+    UPPER(CONCAT(s.nombre, ' ', s.apellido)) AS socio,
+    s.dui,
+    COUNT(m.id_multa) AS total_multas_recibidas,
+    COALESCE(SUM(m.monto), 0.00) AS monto_total_acumulado
+
+FROM socio s
+LEFT JOIN prestamo p ON s.id_socio = p.id_socio
+LEFT JOIN multa m ON p.id_prestamo = m.id_prestamo
+GROUP BY s.id_socio, s.nombre, s.apellido, s.dui
+HAVING COUNT(m.id_multa) > 0
+ORDER BY total_multas_recibidas DESC, monto_total_acumulado DESC;

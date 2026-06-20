@@ -82,3 +82,14 @@ $$;
 
 -- PROCEDURE, el primero es id_socio, id_empleado, id_ejemplar y fecha_limite que son los parametros
 CALL sp_procesar_prestamo(2, 1, 1, '2026-08-15');
+------------------------------------------------
+CALL sp_procesar_prestamo(2, 1, 1, '2026-08-15');
+
+-- Consulta de verificación para demostrar el cambio de estado
+SELECT * FROM ejemplar WHERE id_ejemplar = 1; -- Debería mostrar 'PRESTADO'
+SELECT * FROM prestamo ORDER BY id_prestamo DESC LIMIT 1; -- Muestra el registro creado
+
+
+-- CASO 2: Prueba de validación de error (Intento de prestar el mismo ejemplar ya ocupado)
+-- Debería lanzar la excepción: "ERROR: El ejemplar no esta disponible"
+CALL sp_procesar_prestamo(3, 1, 1, '2026-08-20');
